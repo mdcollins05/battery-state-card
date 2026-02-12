@@ -75,4 +75,63 @@ describe("Grouping", () => {
         expect(card.groupsCount).toBe(1);
         expect(card.group(0).secondaryInfoText).toBe(expectedSecondaryInfo);
     });
+
+    test("unpack option - entity level", async () => {
+        const hass = new HomeAssistantMock<BatteryStateCard>();
+
+        // Create battery entities
+        const battery1 = hass.addEntity("Battery 1", "30");
+        const battery2 = hass.addEntity("Battery 2", "50");
+        const battery3 = hass.addEntity("Battery 3", "70");
+
+        // Create a UI group (sensor with entity_id attribute)
+        const uiGroup = hass.addEntity("UI Group", "50", {
+            entity_id: [battery1.entity_id, battery2.entity_id]
+        }, "sensor");
+
+        const cardElem = hass.addCard("battery-state-card", {
+            entities: [
+                { entity: uiGroup.entity_id, unpack: true },
+                { entity: battery3.entity_id }
+            ]
+        });
+
+        await cardElem.cardUpdated;
+
+        const card = new CardElements(cardElem);
+
+        // Should have 3 items (2 from unpacked group + 1 regular entity)
+        expect(card.itemsCount).toBe(3);
+        expect(card.items[0].nameText).toBe("Battery 1");
+        expect(card.items[0].stateText).toBe("30 %");
+        expect(card.items[1].nameText).toBe("Battery 2");
+        expect(card.items[1].stateText).toBe("50 %");
+        expect(card.items[2].nameText).toBe("Battery 3");
+        expect(card.items[2].stateText).toBe("70 %");
+    });
+
+    test("unpack option - traditional group still works", async () => {
+        const hass = new HomeAssistantMock<BatteryStateCard>();
+
+        const battery1 = hass.addEntity("Battery 1", "40");
+        const battery2 = hass.addEntity("Battery 2", "60");
+
+        // Create traditional group (group.* domain)
+        const traditionalGroup = hass.addEntity("Traditional Group", "50", {
+            entity_id: [battery1.entity_id, battery2.entity_id]
+        }, "group");
+
+        const cardElem = hass.addCard("battery-state-card", {
+            entities: [traditionalGroup.entity_id]  // No unpack needed for group.*
+        });
+
+        await cardElem.cardUpdated;
+
+        const card = new CardElements(cardElem);
+
+        // Should automatically unpack traditional groups
+        expect(card.itemsCount).toBe(2);
+        expect(card.items[0].nameText).toBe("Battery 1");
+        expect(card.items[1].nameText).toBe("Battery 2");
+    });
 });

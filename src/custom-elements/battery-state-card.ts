@@ -14,7 +14,7 @@ import defaultConfig from "../default-config";
 /**
  * Battery Card element
  */
-export class BatteryStateCard extends LovelaceCard<IBatteryCardConfig> {
+export class BatteryStateCard extends LovelaceCard<IBatteryStateCardConfig> {
 
     /**
      * Card title

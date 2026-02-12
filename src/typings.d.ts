@@ -269,6 +269,11 @@ interface IBatteryEntityConfig {
      * Whether to print the debug output
      */
     debug?: string | boolean,
+
+    /**
+     * Whether to unpack entity as a group (check for entity_id attribute)
+     */
+    unpack?: boolean,
 }
 
 interface IBatteryCardConfig {
@@ -300,8 +305,9 @@ interface IBatteryCardConfig {
 
 /**
  * Battery card root config
+ * Combines card-level config with optional entity-level properties (entity property excluded)
  */
-interface IBatteryStateCardConfig extends IBatteryCardConfig, IBatteryEntityConfig  {
+interface IBatteryStateCardConfig extends IBatteryCardConfig, Omit<Partial<IBatteryEntityConfig>, 'entity'>  {
 
 }
 

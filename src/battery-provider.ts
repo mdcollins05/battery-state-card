@@ -59,7 +59,7 @@ export class BatteryProvider {
      */
     private initialized: boolean = false;
 
-    constructor(private config: IBatteryCardConfig) {
+    constructor(private config: IBatteryStateCardConfig) {
         this.include = config.filter?.include?.map(f => new Filter(f));
         this.exclude = config.filter?.exclude?.map(f => new Filter(f));
 
@@ -125,7 +125,7 @@ export class BatteryProvider {
                 throw new Error("Invalid configuration - missing property 'entity' on:\n" + JSON.stringify(e));
             }
 
-            if (e.entity.startsWith("group.")) {
+            if (e.entity.startsWith("group.") || e.unpack) {
                 this.groupsToResolve.push(e.entity);
                 return false;
             }
